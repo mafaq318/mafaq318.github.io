@@ -19,10 +19,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=VT323&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=10" />
   </head>
   <body data-view="terminal">
     <div class="crt-overlay" aria-hidden="true">
@@ -50,28 +50,34 @@
             <button type="button" class="view-switch__btn is-active" data-view-btn="terminal">
               Terminal
             </button>
-            <button type="button" class="view-switch__btn" data-view-btn="profile">
-              Profile
-            </button>
-          </div>
 
-          <button
-            class="nav-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="site-nav"
-            data-nav-toggle
-          >
-            <span class="nav-toggle__bar" aria-hidden="true"></span>
-            <span class="visually-hidden">Menu</span>
-          </button>
-          <nav class="site-nav" id="site-nav" data-nav>
-            <a href="#experience">Experience</a>
-            <a href="#projects">Projects</a>
-            <a href="#skills">Skills</a>
-            <a href="#education">Education</a>
-            <a href="#contact">Contact</a>
-          </nav>
+            <div class="profile-menu" data-profile-menu>
+              <button
+                type="button"
+                class="view-switch__btn view-switch__btn--profile"
+                data-view-btn="profile"
+                data-profile-trigger
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="profile-menu-list"
+              >
+                Profile
+                <span class="profile-menu__caret" aria-hidden="true"></span>
+              </button>
+              <div
+                class="profile-menu__dropdown"
+                id="profile-menu-list"
+                data-profile-dropdown
+                hidden
+              >
+                <a href="#experience" data-profile-link>Experience</a>
+                <a href="#projects" data-profile-link>Projects</a>
+                <a href="#skills" data-profile-link>Skills</a>
+                <a href="#education" data-profile-link>Education</a>
+                <a href="#contact" data-profile-link>Contact</a>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -120,7 +126,6 @@
                 </p>
 
                 <div class="party-trick" data-party-trick>
-                  <p class="party-trick__eyebrow">Party trick</p>
                   <p class="party-trick__title">Mind reader</p>
                   <p class="party-trick__prompt">
                     Think of a number from <strong>1–15</strong>. Tap every card that
@@ -229,6 +234,11 @@
                   <a class="btn btn--primary" href="docs/AFAQ_MOHAMMAD_CV.pdf" download>
                     Download CV
                   </a>
+                  <button type="button" class="btn btn--terminal" data-view-btn="terminal">
+                    <span class="btn--terminal__prompt" aria-hidden="true">$</span>
+                    <span class="btn--terminal__label">Open Terminal</span>
+                    <span class="btn--terminal__caret" aria-hidden="true"></span>
+                  </button>
                   <a class="btn btn--ghost" href="mailto:mafaqq318@gmail.com">Contact</a>
                   <a
                     class="btn btn--ghost"
@@ -238,9 +248,6 @@
                   >
                     LinkedIn
                   </a>
-                  <button type="button" class="btn btn--ghost" data-view-btn="terminal">
-                    Open Terminal
-                  </button>
                 </div>
               </div>
 
@@ -577,6 +584,6 @@
       </main>
     </div>
 
-    <script src="script.js" defer></script>
+    <script src="script.js?v=10" defer></script>
   </body>
 </html>

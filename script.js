@@ -2,14 +2,16 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const body = document.body;
   const header = document.querySelector("[data-header]");
-  const nav = document.querySelector("[data-nav]");
-  const toggle = document.querySelector("[data-nav-toggle]");
   const termOutput = document.querySelector("[data-term-output]");
   const termForm = document.querySelector("[data-term-form]");
   const termInput = document.querySelector("[data-term-input]");
   const profileView = document.querySelector("[data-profile-view]");
   const termView = document.querySelector("[data-term-view]");
   const viewButtons = Array.from(document.querySelectorAll("[data-view-btn]"));
+  const profileMenu = document.querySelector("[data-profile-menu]");
+  const profileTrigger = document.querySelector("[data-profile-trigger]");
+  const profileDropdown = document.querySelector("[data-profile-dropdown]");
+  const profileLinks = Array.from(document.querySelectorAll("[data-profile-link]"));
 
   const history = [];
   let historyIndex = -1;
@@ -82,27 +84,28 @@
   let jokeIndex = Math.floor(Math.random() * JOKES.length);
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const closeNav = () => {
-    if (!nav || !toggle) return;
-    nav.classList.remove("is-open");
-    toggle.setAttribute("aria-expanded", "false");
+  const closeProfileMenu = () => {
+    if (!profileMenu || !profileTrigger || !profileDropdown) return;
+    profileMenu.classList.remove("is-open");
+    profileTrigger.setAttribute("aria-expanded", "false");
+    profileDropdown.hidden = true;
   };
 
-  if (toggle && nav) {
-    toggle.addEventListener("click", () => {
-      const open = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!open));
-      nav.classList.toggle("is-open", !open);
-    });
-    nav.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", closeNav);
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeNav();
-    });
-  }
+  const openProfileMenu = () => {
+    if (!profileMenu || !profileTrigger || !profileDropdown) return;
+    profileMenu.classList.add("is-open");
+    profileTrigger.setAttribute("aria-expanded", "true");
+    profileDropdown.hidden = false;
+  };
 
-  const setView = (view) => {
+  const revealProfileContent = () => {
+    // Sections start hidden — IntersectionObserver never sees them until the view opens
+    profileView?.querySelectorAll("[data-reveal]").forEach((node) => {
+      node.classList.add("is-visible");
+    });
+  };
+
+  const setView = (view, { scrollTop = true } = {}) => {
     const next = view === "profile" ? "profile" : "terminal";
     body.dataset.view = next;
 
@@ -114,14 +117,95 @@
     });
 
     if (next === "terminal") {
-      closeNav();
+      closeProfileMenu();
       requestAnimationFrame(() => termInput?.focus());
     } else {
-      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+      revealProfileContent();
+      if (scrollTop) {
+        // Instant — smooth scroll here races with section jumps from the dropdown
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
     }
   };
+
   viewButtons.forEach((btn) => {
-    btn.addEventListener("click", () => setView(btn.dataset.viewBtn));
+    btn.addEventListener("click", (event) => {
+      const targetView = btn.dataset.viewBtn;
+      if (targetView === "profile") {
+        const wasTerminal = body.dataset.view !== "profile";
+        if (btn.hasAttribute("data-profile-trigger")) {
+          // Only reset scroll when arriving from Terminal; keep position when toggling the menu
+          setView("profile", { scrollTop: wasTerminal });
+          if (profileMenu?.classList.contains("is-open")) closeProfileMenu();
+          else openProfileMenu();
+          event.stopPropagation();
+        } else {
+          setView("profile", { scrollTop: true });
+          closeProfileMenu();
+        }
+        return;
+      }
+      closeProfileMenu();
+      setView("terminal");
+    });
+  });
+
+  const scrollToSection = (section, { smooth = false } = {}) => {
+    if (!section) return;
+    section.scrollIntoView({
+      behavior: smooth && !reduceMotion ? "smooth" : "auto",
+      block: "start",
+    });
+  };
+
+  const goToProfileSection = (href) => {
+    if (!href) return;
+    const section = document.querySelector(href);
+    if (!section) return;
+
+    setView("profile", { scrollTop: false });
+    closeProfileMenu();
+
+    // Wait for Profile to un-hide and lay out, then jump.
+    // history.replaceState does NOT scroll — use hash + scrollIntoView.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const html = document.documentElement;
+        const prevBehavior = html.style.scrollBehavior;
+        html.style.scrollBehavior = "auto";
+
+        const { pathname, search } = window.location;
+        if (window.location.hash === href) {
+          history.replaceState(null, "", pathname + search);
+        }
+        window.location.hash = href;
+        scrollToSection(section, { smooth: false });
+
+        html.style.scrollBehavior = prevBehavior;
+      });
+    });
+  };
+
+  // Event delegation — survives any DOM churn and always sees dropdown clicks
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const link = target.closest("[data-profile-link]");
+    if (link) {
+      event.preventDefault();
+      event.stopPropagation();
+      goToProfileSection(link.getAttribute("href"));
+      return;
+    }
+
+    if (profileMenu && !profileMenu.contains(target)) {
+      closeProfileMenu();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeProfileMenu();
   });
 
   document.querySelector("[data-home]")?.addEventListener("click", (event) => {
@@ -129,11 +213,13 @@
       event.preventDefault();
       runCommand("help", { echo: true });
       termInput?.focus();
+    } else {
+      event.preventDefault();
+      setView("profile");
     }
   });
 
-  const navLinks = nav ? Array.from(nav.querySelectorAll("a[href^='#']")) : [];
-  const sections = navLinks
+  const sections = profileLinks
     .map((link) => {
       const id = link.getAttribute("href");
       return id ? document.querySelector(id) : null;
@@ -149,7 +235,7 @@
     sections.forEach((section) => {
       if (section.offsetTop <= marker) activeId = `#${section.id}`;
     });
-    navLinks.forEach((link) => {
+    profileLinks.forEach((link) => {
       link.classList.toggle("is-active", link.getAttribute("href") === activeId);
     });
   };
@@ -213,7 +299,7 @@
     appendBlock(`
       <pre class="term-line term-line--dim">Available commands — click one or type it below:</pre>
       <div class="term-help">${rows}</div>
-      <pre class="term-line term-line--dim">Tip: try the <span class="term-accent">mind reader</span> party trick on the left — or type <span class="term-accent">joke</span>.</pre>
+      <pre class="term-line term-line--dim">Tip: try the <span class="term-accent">mind reader</span> on the left — or type <span class="term-accent">joke</span>.</pre>
     `);
   };
 
@@ -389,8 +475,78 @@
       return;
     }
 
+    // Cheeky replies for power-user / doomsday commands
+    const hirePun = matchHirePun(input, name, args);
+    if (hirePun) {
+      hirePun.forEach((line, i) =>
+        appendLine(line, i === 0 ? "term-line--warn" : "term-line--dim")
+      );
+      return;
+    }
+
     appendLine(`command not found: ${name}`, "term-line--err");
     appendLine('Type "help" to see available commands.', "term-line--dim");
+  };
+
+  const HIRE_PUNS = [
+    {
+      test: (input, name, args) =>
+        name === "sudo" ||
+        (name === "su" && (!args.length || args[0] === "-" || args[0] === "root")) ||
+        input.includes("sudo root") ||
+        (name === "root" && !args.length),
+      lines: [
+        "Permission denied: ego too large, offer letter too small.",
+        "So soon? Hire me as root and I’ll grant you sudo on delivery.",
+      ],
+    },
+    {
+      test: (input, name) =>
+        name === "shutdown" ||
+        name === "reboot" ||
+        name === "halt" ||
+        name === "poweroff" ||
+        name === "init",
+      lines: [
+        "shutdown: Access denied — this shell is still in probation.",
+        "Shutting down already? Hire me first; I come with uptime SLAs.",
+      ],
+    },
+    {
+      test: (input, name, args) =>
+        name === "rm" && args.some((a) => a === "-rf" || a === "-fr" || a.startsWith("/")),
+      lines: [
+        "rm: refusing to delete the only engineer in the room.",
+        "Nice try. Hire me and I’ll rm technical debt instead.",
+      ],
+    },
+    {
+      test: (input, name) =>
+        name === "kill" || name === "killall" || name === "pkill",
+      lines: [
+        "kill: process 'mafaq' is protected (SIGHIRE).",
+        "Don’t kill the vibe — hire me and we’ll SIGTERM the backlog.",
+      ],
+    },
+    {
+      test: (input, name) => name === "forkbomb" || input.includes(":(){"),
+      lines: [
+        "forkbomb detected. Redirecting energy into job applications…",
+        "So soon? Hire me — I scale better than `ulimit -u`.",
+      ],
+    },
+    {
+      test: (input, name) => name === "exit" || name === "logout" || name === "quit",
+      lines: [
+        "exit: session sticky. Recruiter cookies enabled.",
+        "Leaving already? Hire me and I’ll stick around for the long run.",
+      ],
+    },
+  ];
+
+  const matchHirePun = (input, name, args) => {
+    const hit = HIRE_PUNS.find((entry) => entry.test(input.toLowerCase(), name, args));
+    return hit ? hit.lines : null;
   };
 
   termView?.addEventListener("click", (event) => {
@@ -406,31 +562,69 @@
     const root = document.querySelector("[data-party-trick]");
     if (!root) return;
 
-    const cards = Array.from(root.querySelectorAll("[data-party-card]"));
+    const cardsEl = root.querySelector(".party-trick__cards");
     const revealBtn = root.querySelector("[data-party-reveal]");
     const resetBtn = root.querySelector("[data-party-reset]");
     const resultEl = root.querySelector("[data-party-result]");
 
-    const reset = () => {
+    const getCards = () => Array.from(root.querySelectorAll("[data-party-card]"));
+
+    const shuffleCards = () => {
+      if (!cardsEl) return;
+      const cards = getCards();
+      for (let i = cards.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      // Avoid landing on the exact previous order
+      const sameOrder =
+        cards.length > 1 &&
+        cards.every((card, index) => card === cardsEl.children[index]);
+      if (sameOrder) {
+        cards.push(cards.shift());
+      }
+      cards.forEach((card) => cardsEl.appendChild(card));
+    };
+
+    const reset = async () => {
       root.classList.remove("is-solved");
-      cards.forEach((card) => card.setAttribute("aria-pressed", "false"));
+      getCards().forEach((card) => card.setAttribute("aria-pressed", "false"));
       if (resultEl) {
         resultEl.textContent = "";
         resultEl.classList.remove("is-reveal");
       }
+
+      if (!reduceMotion && cardsEl) {
+        root.classList.add("is-shuffling");
+        if (resultEl) resultEl.textContent = "Shuffling cards…";
+        await sleep(280);
+        shuffleCards();
+        await sleep(220);
+        root.classList.remove("is-shuffling");
+        if (resultEl) resultEl.textContent = "";
+      } else {
+        shuffleCards();
+      }
+
       if (revealBtn) revealBtn.hidden = false;
       if (resetBtn) resetBtn.hidden = true;
     };
 
-    cards.forEach((card) => {
-      card.addEventListener("click", () => {
-        if (root.classList.contains("is-solved")) return;
-        const on = card.getAttribute("aria-pressed") === "true";
-        card.setAttribute("aria-pressed", String(!on));
-      });
+    root.addEventListener("click", (event) => {
+      const card =
+        event.target instanceof Element
+          ? event.target.closest("[data-party-card]")
+          : null;
+      if (!card || !root.contains(card)) return;
+      if (root.classList.contains("is-solved") || root.classList.contains("is-shuffling")) {
+        return;
+      }
+      const on = card.getAttribute("aria-pressed") === "true";
+      card.setAttribute("aria-pressed", String(!on));
     });
 
     revealBtn?.addEventListener("click", async () => {
+      const cards = getCards();
       const selected = cards.filter((c) => c.getAttribute("aria-pressed") === "true");
       const total = selected.reduce(
         (sum, card) => sum + Number(card.dataset.value || 0),
@@ -458,10 +652,12 @@
       resultEl.textContent = `You’re thinking of ${total}.`;
       resultEl.classList.add("is-reveal");
 
-      appendLine(`party-trick: guessed ${total} (binary mind reader)`, "term-line--dim");
+      appendLine(`mind-reader: guessed ${total}`, "term-line--dim");
     });
 
-    resetBtn?.addEventListener("click", reset);
+    resetBtn?.addEventListener("click", () => {
+      void reset();
+    });
   };
 
   termForm?.addEventListener("submit", (event) => {
@@ -597,9 +793,9 @@
       columns = Array.from({ length: Math.floor(width / fontSize) }, () => Math.random() * -40);
     };
     const draw = () => {
-      ctx.fillStyle = "rgba(5, 12, 9, 0.08)";
+      ctx.fillStyle = "rgba(15, 10, 5, 0.08)";
       ctx.fillRect(0, 0, width, height);
-      ctx.fillStyle = "rgba(57, 255, 136, 0.75)";
+      ctx.fillStyle = "rgba(255, 176, 0, 0.75)";
       ctx.font = `${fontSize}px "IBM Plex Mono", monospace`;
       columns.forEach((y, index) => {
         const char = glyphs[Math.floor(Math.random() * glyphs.length)];
@@ -615,8 +811,6 @@
 
   const init = async () => {
     startUptime();
-    startPhosphorSpot();
-    startCodeRain();
     initPartyTrick();
 
     // Always land on Terminal. Hash links (e.g. #experience) open Profile.
@@ -629,14 +823,17 @@
       /* ignore */
     }
 
-    setView(initialView);
+    setView(initialView, { scrollTop: !location.hash });
     await boot();
 
     if (body.dataset.view === "terminal") {
       appendLine("MAFAQ portfolio shell — type a command or click one below.");
-      appendLine("Party trick loaded on the left: binary mind reader.", "term-line--dim");
+      appendLine("Mind reader loaded on the left — pick a number from 1–15.", "term-line--dim");
       runCommand("help", { echo: true });
       termInput?.focus();
+    } else if (location.hash) {
+      const section = document.querySelector(location.hash);
+      requestAnimationFrame(() => scrollToSection(section));
     }
   };
   init();
