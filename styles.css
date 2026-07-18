@@ -378,7 +378,55 @@ body[data-view="profile"] .term-view {
 }
 
 .term-window__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   color: var(--muted);
+}
+
+.term-music {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid rgba(48, 209, 88, 0.35);
+  border-radius: 6px;
+  background: rgba(48, 209, 88, 0.06);
+  color: var(--phosphor);
+  font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background-color 0.2s var(--ease),
+    border-color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
+}
+
+.term-music:hover,
+.term-music:focus-visible {
+  background: rgba(48, 209, 88, 0.14);
+  border-color: rgba(48, 209, 88, 0.55);
+}
+
+.term-music[aria-pressed="true"] {
+  background: rgba(48, 209, 88, 0.18);
+  border-color: var(--phosphor);
+  box-shadow: 0 0 12px rgba(48, 209, 88, 0.2);
+}
+
+.term-music[aria-pressed="false"] {
+  opacity: 0.55;
+  border-color: var(--line);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.term-music__icon {
+  font-size: 0.9em;
+  line-height: 1;
 }
 
 .term-body {
@@ -1317,6 +1365,12 @@ body[data-view="profile"] .term-view {
   to {
     filter: contrast(1.08) saturate(0.85) brightness(0.95);
     transform: scale(1);
+  }
+}
+
+@media (max-width: 560px) {
+  .term-music__label {
+    display: none;
   }
 }
 

@@ -47,6 +47,9 @@
     joke: {
       summary: "Random programmer joke",
     },
+    music: {
+      summary: "Toggle command beeps on/off",
+    },
     clear: {
       summary: "Clear the terminal",
     },
@@ -404,7 +407,7 @@
     },
   };
 
-  const runCommand = (raw, { echo = true } = {}) => {
+  const runCommand = (raw, { echo = true, sfx = true } = {}) => {
     const input = String(raw || "").trim();
     if (!input) return;
 
@@ -416,6 +419,8 @@
           .replace(/>/g, "&gt;")}</pre>
       `);
     }
+
+    if (sfx) termSfx?.blip();
 
     const [name, ...args] = input.toLowerCase().split(/\s+/);
     const aliases = {
@@ -436,6 +441,9 @@
       funny: "joke",
       partytrick: "joke",
       "party-trick": "joke",
+      bgm: "music",
+      sfx: "music",
+      beep: "music",
     };
 
     let cmd = aliases[name] || name;
@@ -455,6 +463,16 @@
     }
     if (cmd === "joke") {
       tellJoke();
+      return;
+    }
+    if (cmd === "music" || cmd === "mute" || cmd === "unmute" || cmd === "sfx") {
+      const nextOn =
+        cmd === "mute" ? false : cmd === "unmute" ? true : !termSfx?.enabled();
+      termSfx?.setEnabled(nextOn);
+      appendLine(
+        nextOn ? "command beeps: on" : "command beeps: off",
+        "term-line--dim"
+      );
       return;
     }
     if (cmd === "cv") {
@@ -809,6 +827,84 @@
     requestAnimationFrame(draw);
   };
 
+  const createTermSfx = () => {
+    const btn = document.querySelector("[data-term-sfx]");
+    const label = btn?.querySelector(".term-music__label");
+    let ctx = null;
+    let enabled = true;
+
+    const syncUi = () => {
+      if (!btn) return;
+      btn.setAttribute("aria-pressed", String(enabled));
+      btn.title = enabled ? "Mute command beeps" : "Enable command beeps";
+      if (label) label.textContent = enabled ? "sfx on" : "sfx off";
+    };
+
+    const ensureCtx = async () => {
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        ctx = new AC();
+      }
+      if (ctx.state === "suspended") await ctx.resume();
+      return true;
+    };
+
+    const tone = (freq, when, dur, type, gainVal) => {
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, when);
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(2400, when);
+      gain.gain.setValueAtTime(0.0001, when);
+      gain.gain.exponentialRampToValueAtTime(gainVal, when + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(when);
+      osc.stop(when + dur + 0.03);
+    };
+
+    // Classic retro “command accepted” two-note blip
+    const blip = () => {
+      if (!enabled || reduceMotion) return;
+      void ensureCtx().then((ok) => {
+        if (!ok || !ctx) return;
+        const t = ctx.currentTime;
+        tone(520, t, 0.05, "square", 0.04);
+        tone(780, t + 0.055, 0.07, "square", 0.035);
+      });
+    };
+
+    const setEnabled = (on) => {
+      enabled = Boolean(on);
+      syncUi();
+      if (enabled) blip();
+    };
+
+    btn?.addEventListener("click", () => {
+      setEnabled(!enabled);
+      appendLine(
+        enabled ? "command beeps: on" : "command beeps: off",
+        "term-line--dim"
+      );
+    });
+
+    syncUi();
+
+    return {
+      blip,
+      setEnabled,
+      enabled: () => enabled,
+    };
+  };
+
+  const termSfx = createTermSfx();
+
   const hackerizeTerminalPortrait = () => {
     const img = document.querySelector(".crt-portrait--hacker img");
     if (!img || img.dataset.hackerized === "1") return;
@@ -901,7 +997,7 @@
     if (body.dataset.view === "terminal") {
       appendLine("MAFAQ portfolio shell — type a command or click one below.");
       appendLine("Mind reader loaded on the left — pick a number from 1–15.", "term-line--dim");
-      runCommand("help", { echo: true });
+      runCommand("help", { echo: true, sfx: false });
       termInput?.focus();
     } else if (location.hash) {
       const section = document.querySelector(location.hash);

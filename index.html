@@ -22,7 +22,7 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=15" />
+    <link rel="stylesheet" href="styles.css?v=17" />
   </head>
   <body data-view="terminal">
     <div class="crt-overlay" aria-hidden="true">
@@ -92,10 +92,22 @@
           <div class="term-window">
             <div class="term-window__titlebar">
               <span>visitor@mafaq318.github.io — bash</span>
-              <span class="term-window__meta"
-                >session <span data-uptime>00:00:00</span> ·
-                <span class="status-ok">ONLINE</span></span
-              >
+              <div class="term-window__meta">
+                <button
+                  type="button"
+                  class="term-music"
+                  data-term-sfx
+                  aria-pressed="true"
+                  title="Mute command beeps"
+                >
+                  <span class="term-music__icon" aria-hidden="true">♪</span>
+                  <span class="term-music__label">sfx on</span>
+                </button>
+                <span
+                  >session <span data-uptime>00:00:00</span> ·
+                  <span class="status-ok">ONLINE</span></span
+                >
+              </div>
             </div>
 
             <div class="term-body">
@@ -584,6 +596,6 @@
       </main>
     </div>
 
-    <script src="script.js?v=15" defer></script>
+    <script src="script.js?v=17" defer></script>
   </body>
 </html>
