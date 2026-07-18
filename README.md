@@ -2,7 +2,7 @@
 
 Personal site for [Mohammad Afaq](https://mafaq318.github.io) — Software Engineer / Design Lead focused on embedded and automotive software.
 
-Static HTML, CSS, and JavaScript, hosted with GitHub Pages.
+Static HTML, CSS, and JavaScript, hosted with GitHub Pages. Default view is an interactive terminal (`help` lists commands); switch to **Profile** in the top bar for a standard page layout.
 
 ## Preview locally
 
