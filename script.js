@@ -809,9 +809,81 @@
     requestAnimationFrame(draw);
   };
 
+  const hackerizeTerminalPortrait = () => {
+    const img = document.querySelector(".crt-portrait--hacker img");
+    if (!img || img.dataset.hackerized === "1") return;
+
+    // Bayer 4×4 — classic terminal / hacker dither
+    const bayer = [
+      [0, 8, 2, 10],
+      [12, 4, 14, 6],
+      [3, 11, 1, 9],
+      [15, 7, 13, 5],
+    ];
+
+    const apply = () => {
+      try {
+        const srcW = img.naturalWidth || img.width;
+        const srcH = img.naturalHeight || img.height;
+        if (!srcW || !srcH) return;
+
+        // Low-res dither, then nearest-neighbor upscale = chunky hacker bitmap
+        const pixelSize = 3;
+        const w = Math.max(48, Math.floor(srcW / pixelSize));
+        const h = Math.max(48, Math.floor(srcH / pixelSize));
+
+        const small = document.createElement("canvas");
+        small.width = w;
+        small.height = h;
+        const sctx = small.getContext("2d", { willReadFrequently: true });
+        if (!sctx) return;
+
+        sctx.imageSmoothingEnabled = true;
+        sctx.drawImage(img, 0, 0, w, h);
+        const frame = sctx.getImageData(0, 0, w, h);
+        const data = frame.data;
+
+        const on = [48, 209, 88];
+        const off = [2, 8, 4];
+
+        for (let y = 0; y < h; y += 1) {
+          for (let x = 0; x < w; x += 1) {
+            const i = (y * w + x) * 4;
+            let luma = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+            luma = Math.min(255, Math.max(0, (luma - 12) * 1.25));
+            const threshold = ((bayer[y & 3][x & 3] + 0.5) / 16) * 255;
+            const lit = luma > threshold;
+            data[i] = lit ? on[0] : off[0];
+            data[i + 1] = lit ? on[1] : off[1];
+            data[i + 2] = lit ? on[2] : off[2];
+            data[i + 3] = 255;
+          }
+        }
+        sctx.putImageData(frame, 0, 0);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = srcW;
+        canvas.height = srcH;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(small, 0, 0, srcW, srcH);
+
+        img.dataset.hackerized = "1";
+        img.src = canvas.toDataURL("image/png");
+      } catch {
+        /* ignore — leave original photo */
+      }
+    };
+
+    if (img.complete && img.naturalWidth) apply();
+    else img.addEventListener("load", apply, { once: true });
+  };
+
   const init = async () => {
     startUptime();
     initPartyTrick();
+    hackerizeTerminalPortrait();
 
     // Always land on Terminal. Hash links (e.g. #experience) open Profile.
     const initialView =
