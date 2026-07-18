@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mohammad Afaq — Software Engineer</title>
+    <meta
+      name="description"
+      content="Software Engineer / Design Lead specializing in embedded systems, modern C++, and automotive software. Based in Oulu, Finland."
+    />
+    <meta property="og:title" content="Mohammad Afaq — Software Engineer" />
+    <meta
+      property="og:description"
+      content="Embedded & automotive software engineer with hands-on C/C++, Python, Yocto, and Adaptive AUTOSAR experience."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mafaq318.github.io/" />
+    <meta property="og:image" content="https://mafaq318.github.io/assets/portrait.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="crt-overlay" aria-hidden="true">
+      <div class="crt-overlay__scanlines"></div>
+      <div class="crt-overlay__vignette"></div>
+    </div>
+    <canvas class="code-rain" data-code-rain aria-hidden="true"></canvas>
+    <div class="phosphor-spot" data-phosphor aria-hidden="true"></div>
+
+    <div class="boot-screen" data-boot aria-hidden="true">
+      <pre class="boot-screen__log" data-boot-log></pre>
+    </div>
+
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="terminal-shell">
+      <header class="site-header" data-header>
+        <div class="site-header__inner">
+          <div class="window-dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <a class="site-logo" href="#top">mafaq@oulu:~$</a>
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="site-nav"
+            data-nav-toggle
+          >
+            <span class="nav-toggle__bar" aria-hidden="true"></span>
+            <span class="visually-hidden">Menu</span>
+          </button>
+          <nav class="site-nav" id="site-nav" data-nav>
+            <a href="#experience">./experience</a>
+            <a href="#projects">./projects</a>
+            <a href="#skills">./skills</a>
+            <a href="#education">./education</a>
+            <a href="#contact">./contact</a>
+          </nav>
+        </div>
+      </header>
+
+      <main id="main">
+        <section class="hero" id="top" aria-label="Introduction">
+          <div class="hero__layout">
+            <div class="hero__copy">
+              <p class="hero__prompt">
+                <span class="prompt-user">visitor</span
+                ><span class="prompt-at">@</span
+                ><span class="prompt-host">mafaq318.github.io</span
+                ><span class="prompt-path">:~$</span>
+                <span data-typed-cmd></span><span class="cursor" aria-hidden="true"></span>
+              </p>
+              <p class="hero__location">// Oulu, Finland</p>
+              <h1 class="hero__name">Mohammad Afaq</h1>
+              <p class="hero__role">
+                <span data-typed-role></span><span class="cursor cursor--role" aria-hidden="true"></span>
+              </p>
+              <p class="hero__summary" data-typed-summary></p>
+              <div class="hero__actions">
+                <a class="btn btn--primary" href="docs/AFAQ_MOHAMMAD_CV.pdf" download>
+                  &gt; download_cv.pdf
+                </a>
+                <a class="btn btn--ghost" href="mailto:mafaqq318@gmail.com">&gt; mail</a>
+                <a
+                  class="btn btn--ghost"
+                  href="https://www.linkedin.com/in/mafaq"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  &gt; linkedin
+                </a>
+              </div>
+              <p class="hero__meta">
+                session <span data-uptime>00:00:00</span> · status
+                <span class="status-ok">ONLINE</span>
+              </p>
+            </div>
+
+            <figure class="crt-portrait">
+              <div class="crt-portrait__bezel">
+                <div class="crt-portrait__screen">
+                  <img
+                    src="assets/portrait.jpg"
+                    alt="Portrait of Mohammad Afaq"
+                    width="460"
+                    height="460"
+                    decoding="async"
+                  />
+                  <div class="crt-portrait__scan" aria-hidden="true"></div>
+                  <div class="crt-portrait__glare" aria-hidden="true"></div>
+                </div>
+                <figcaption class="crt-portrait__caption">
+                  IMG_001 · PORTRAIT.BMP · 460x460
+                </figcaption>
+              </div>
+            </figure>
+          </div>
+        </section>
+
+        <section class="section" id="experience">
+          <div class="section__inner">
+            <header class="section__header reveal" data-reveal>
+              <p class="section__cmd">$ cat experience.log</p>
+              <h2>Experience</h2>
+              <p>Production software ownership across automotive and enterprise systems.</p>
+            </header>
+
+            <ol class="timeline">
+              <li class="timeline__item reveal" data-reveal>
+                <div class="timeline__meta">
+                  <span class="timeline__dates">Oct 2022 – Present</span>
+                  <span class="timeline__place">Oulu, Finland</span>
+                </div>
+                <div class="timeline__body">
+                  <h3>Software Engineer / Design Lead</h3>
+                  <p class="timeline__org">Elektrobit Automotive Finland Oy</p>
+                  <ul>
+                    <li>
+                      Lead the design and technical ownership of two Adaptive AUTOSAR
+                      components for a Linux-based automotive platform.
+                    </li>
+                    <li>
+                      Develop production-ready C++ Adaptive applications with focus on
+                      security, reliability, maintainability, and performance.
+                    </li>
+                    <li>
+                      Improve software quality through code coverage (Bullseye) and unit,
+                      integration, and fuzz testing (GoogleTest, GoogleMock, Robot
+                      Framework).
+                    </li>
+                    <li>
+                      Leverage AI-assisted tools to accelerate debugging, implementation,
+                      and development workflows.
+                    </li>
+                    <li>
+                      Coordinate with component owners to maintain requirements, resolve
+                      integration issues, and support software development across the
+                      build system.
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="timeline__item reveal" data-reveal>
+                <div class="timeline__meta">
+                  <span class="timeline__dates">Sept 2021 – Aug 2022</span>
+                  <span class="timeline__place">Islamabad, Pakistan</span>
+                </div>
+                <div class="timeline__body">
+                  <h3>Associate Consultant</h3>
+                  <p class="timeline__org">Teradata Global Consulting</p>
+                  <ul>
+                    <li>Supported enterprise ETL/DCM systems for retail-sector clients.</li>
+                    <li>
+                      Managed SQL database operations including performance tuning,
+                      monitoring, backup, and recovery.
+                    </li>
+                    <li>
+                      Supported cloud infrastructure and integration workflows using
+                      Microsoft Azure.
+                    </li>
+                    <li>
+                      Automated operational tasks and service workflows to improve
+                      efficiency and reduce manual effort.
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="timeline__item reveal" data-reveal>
+                <div class="timeline__meta">
+                  <span class="timeline__dates">June 2021 – Sept 2021</span>
+                  <span class="timeline__place">Lahore, Pakistan</span>
+                </div>
+                <div class="timeline__body">
+                  <h3>Technical Engineer</h3>
+                  <p class="timeline__org">Educative Inc</p>
+                  <ul>
+                    <li>Worked with Docker and Kubernetes environments.</li>
+                    <li>Applied shell scripting and Elixir testing in day-to-day work.</li>
+                  </ul>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="section section--alt" id="projects">
+          <div class="section__inner">
+            <header class="section__header reveal" data-reveal>
+              <p class="section__cmd">$ ls ./projects</p>
+              <h2>Projects</h2>
+              <p>Selected work spanning software-defined vehicles and applied ML research.</p>
+            </header>
+
+            <div class="project-list">
+              <article class="project reveal" data-reveal>
+                <p class="project__label">[elektrobit]</p>
+                <h3>Volkswagen ICAS1 Program</h3>
+                <ul>
+                  <li>
+                    Developed and maintained embedded C++ (C++14 / C++20) software
+                    components for Volkswagen’s ICAS1 software-defined vehicle platform.
+                  </li>
+                  <li>
+                    Implemented new features and improvements while maintaining existing
+                    functionality across multiple software components.
+                  </li>
+                  <li>Supporting migration from C++14 to C++20 standards.</li>
+                  <li>
+                    Linux platform updates, SDK upgrades, and software stack maintenance
+                    for compatibility and long-term support.
+                  </li>
+                </ul>
+              </article>
+
+              <article class="project reveal" data-reveal>
+                <p class="project__label">[thesis/msc]</p>
+                <h3>
+                  Model Quantization for Efficient Differential Mobility Spectrometry
+                  (DMS) Analysis
+                </h3>
+                <ul>
+                  <li>
+                    Researched and evaluated attention mechanisms to improve DMS plot
+                    prediction using a U-Net-based architecture.
+                  </li>
+                  <li>
+                    Investigated model quantization techniques and their impact on
+                    accuracy, memory footprint, and inference performance for embedded
+                    deployment.
+                  </li>
+                </ul>
+              </article>
+
+              <article class="project reveal" data-reveal>
+                <p class="project__label">[thesis/bsc]</p>
+                <h3>
+                  Detection and Removal of Motion Artifacts from Photoplethysmogram (PPG)
+                  Data
+                </h3>
+                <ul>
+                  <li>
+                    Processed and analyzed PPG sensor data affected by motion and
+                    perfusion artifacts.
+                  </li>
+                  <li>
+                    Implemented a real-time overlapping-window algorithm for artifact
+                    removal and improved heart-rate accuracy.
+                  </li>
+                </ul>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="skills">
+          <div class="section__inner">
+            <header class="section__header reveal" data-reveal>
+              <p class="section__cmd">$ ./skills --list</p>
+              <h2>Skills</h2>
+              <p>Technical strengths across embedded platforms, tooling, and delivery practices.</p>
+            </header>
+
+            <div class="skills-grid">
+              <div class="skill-group reveal" data-reveal>
+                <h3>Programming Languages</h3>
+                <p>C, C++ (C++14, C++20), Python, SQL, Shell Scripting</p>
+              </div>
+              <div class="skill-group reveal" data-reveal>
+                <h3>Operating Systems &amp; Environments</h3>
+                <p>Linux, Ubuntu, WSL, VirtualBox, Embedded Linux</p>
+              </div>
+              <div class="skill-group reveal" data-reveal>
+                <h3>Development &amp; Build Tools</h3>
+                <p>
+                  Git, GitHub, Docker, Yocto, Jenkins, CI/CD Pipelines, Makefiles, GCC,
+                  CMake
+                </p>
+              </div>
+              <div class="skill-group reveal" data-reveal>
+                <h3>Testing &amp; Validation</h3>
+                <p>
+                  Robot Framework, GoogleTest, GoogleMock, Target Testing, Debugging,
+                  Unit Testing, Integration Testing, Fuzz Testing, GDB
+                </p>
+              </div>
+              <div class="skill-group reveal" data-reveal>
+                <h3>Embedded &amp; Automotive</h3>
+                <p>
+                  Embedded Systems, SDK Maintenance, AUTOSAR, Secure Software Development
+                </p>
+              </div>
+              <div class="skill-group reveal" data-reveal>
+                <h3>Software Engineering Practices</h3>
+                <p>
+                  Agile/Scrum, Jira, Version Control, Code Reviews, Requirement Tracing,
+                  Code Coverage, SwDD &amp; SwAD Technical Documentation
+                </p>
+              </div>
+              <div class="skill-group reveal" data-reveal>
+                <h3>AI &amp; Automation</h3>
+                <p>
+                  AI-assisted Development, GitHub Copilot, Agent-led Development
+                </p>
+              </div>
+              <div class="skill-group reveal" data-reveal>
+                <h3>Professional Skills</h3>
+                <p>
+                  Cross-component support, problem-solving, critical thinking, team
+                  collaboration
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section section--alt" id="education">
+          <div class="section__inner">
+            <header class="section__header reveal" data-reveal>
+              <p class="section__cmd">$ man education</p>
+              <h2>Education &amp; Certifications</h2>
+              <p>Academic foundation in computing sciences and electrical engineering.</p>
+            </header>
+
+            <div class="edu-layout">
+              <div class="edu-list">
+                <article class="edu-item reveal" data-reveal>
+                  <div class="edu-item__meta">
+                    <span>Aug 2022 – Mar 2026</span>
+                    <span>Tampere, Finland</span>
+                  </div>
+                  <h3>M.Sc. (Technology) in Computing Sciences</h3>
+                  <p class="edu-item__org">Tampere University</p>
+                  <p>
+                    Major: Signal Processing and Machine Learning. Coursework includes
+                    Machine Learning, Artificial Intelligence, Pattern Recognition,
+                    Advanced Signal Processing, Complex Networks, and Programming
+                    Techniques in C.
+                  </p>
+                </article>
+
+                <article class="edu-item reveal" data-reveal>
+                  <div class="edu-item__meta">
+                    <span>Sept 2017 – May 2021</span>
+                    <span>Lahore, Pakistan</span>
+                  </div>
+                  <h3>B.Sc. in Electrical Engineering</h3>
+                  <p class="edu-item__org">
+                    Lahore University of Management Sciences
+                  </p>
+                  <p>
+                    Coursework includes Microcontrollers, Advanced Digital Signal
+                    Processing, Deep Learning, Speech Processing, and Applied Probability.
+                  </p>
+                </article>
+              </div>
+
+              <aside class="certs reveal" data-reveal>
+                <h3>Certifications</h3>
+                <ul>
+                  <li>CMake for Cross-Platform C++ Project Building</li>
+                  <li>Teradata Vantage Associate Certified</li>
+                  <li>Microsoft Azure Fundamentals Certified</li>
+                  <li>2023 Web Development Bootcamp</li>
+                  <li>C++ Unit Testing: Google Test and Google Mock</li>
+                </ul>
+              </aside>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer" id="contact">
+        <div class="site-footer__inner reveal" data-reveal>
+          <p class="section__cmd">$ whoami && contact --open</p>
+          <div class="site-footer__brand">
+            <p class="site-footer__name">Mohammad Afaq</p>
+            <p class="site-footer__tag">
+              Software Engineer · Embedded &amp; Automotive · Oulu, Finland
+            </p>
+          </div>
+          <nav class="site-footer__links" aria-label="Contact links">
+            <a href="mailto:mafaqq318@gmail.com">mafaqq318@gmail.com</a>
+            <a
+              href="https://github.com/mafaq318"
+              target="_blank"
+              rel="noopener noreferrer"
+              >GitHub</a
+            >
+            <a
+              href="https://www.linkedin.com/in/mafaq"
+              target="_blank"
+              rel="noopener noreferrer"
+              >LinkedIn</a
+            >
+            <a href="docs/AFAQ_MOHAMMAD_CV.pdf" download>Download CV</a>
+          </nav>
+          <p class="site-footer__note">
+            // references available upon request · EOF
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
