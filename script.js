@@ -42,6 +42,9 @@
     ls: {
       summary: "List sections",
     },
+    joke: {
+      summary: "Random programmer joke",
+    },
     clear: {
       summary: "Clear the terminal",
     },
@@ -50,6 +53,33 @@
     },
   };
 
+  const JOKES = [
+    {
+      setup: "Why do programmers prefer dark mode?",
+      punchline: "Because light attracts bugs.",
+    },
+    {
+      setup: "A SQL query walks into a bar, walks up to two tables, and asks:",
+      punchline: '"Mind if I join you?"',
+    },
+    {
+      setup: "How many programmers does it take to change a light bulb?",
+      punchline: "None. It's a hardware problem.",
+    },
+    {
+      setup: "What's a programmer's favorite hangout?",
+      punchline: "Foo Bar.",
+    },
+    {
+      setup: "Why did the C++ developer go broke?",
+      punchline: "Because he lost his object of reference.",
+    },
+    {
+      setup: "There are only 10 kinds of people in the world.",
+      punchline: "Those who understand binary, and those who don't.",
+    },
+  ];
+  let jokeIndex = Math.floor(Math.random() * JOKES.length);
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const closeNav = () => {
@@ -89,14 +119,7 @@
     } else {
       window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
     }
-
-    try {
-      localStorage.setItem("mafaq-view", next);
-    } catch {
-      /* ignore */
-    }
   };
-
   viewButtons.forEach((btn) => {
     btn.addEventListener("click", () => setView(btn.dataset.viewBtn));
   });
@@ -190,9 +213,32 @@
     appendBlock(`
       <pre class="term-line term-line--dim">Available commands — click one or type it below:</pre>
       <div class="term-help">${rows}</div>
-      <pre class="term-line term-line--dim">Tip: type <span class="term-accent">profile</span> for a simpler page layout.</pre>
+      <pre class="term-line term-line--dim">Tip: try the <span class="term-accent">mind reader</span> party trick on the left — or type <span class="term-accent">joke</span>.</pre>
     `);
   };
+
+  const tellJoke = async () => {
+    const joke = JOKES[jokeIndex % JOKES.length];
+    jokeIndex += 1;
+    appendLine(joke.setup);
+    if (reduceMotion) {
+      appendLine(joke.punchline, "term-line--punch");
+      return;
+    }
+    appendLine("...", "term-line--dim");
+    await sleep(700);
+    const lastBlock = termOutput?.querySelector(".term-block:last-child");
+    const dots = lastBlock?.querySelector(".term-line--dim");
+    if (dots && dots.textContent === "...") {
+      dots.textContent = joke.punchline;
+      dots.classList.remove("term-line--dim");
+      dots.classList.add("term-line--punch");
+    } else {
+      appendLine(joke.punchline, "term-line--punch");
+    }
+    scrollTerm();
+  };
+
   const content = {
     whoami() {
       appendLine("Mohammad Afaq");
@@ -267,7 +313,7 @@
       `);
     },
     ls() {
-      appendLine("experience  projects  skills  education  contact  cv");
+      appendLine("experience  projects  skills  education  contact  cv  joke");
       appendLine("Type a name, or run help.");
     },
   };
@@ -300,6 +346,10 @@
       email: "contact",
       resume: "cv",
       "download-cv": "cv",
+      jokes: "joke",
+      funny: "joke",
+      partytrick: "joke",
+      "party-trick": "joke",
     };
 
     let cmd = aliases[name] || name;
@@ -315,6 +365,10 @@
     }
     if (cmd === "clear") {
       if (termOutput) termOutput.innerHTML = "";
+      return;
+    }
+    if (cmd === "joke") {
+      tellJoke();
       return;
     }
     if (cmd === "cv") {
@@ -339,7 +393,7 @@
     appendLine('Type "help" to see available commands.', "term-line--dim");
   };
 
-  termOutput?.addEventListener("click", (event) => {
+  termView?.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
     const cmd = target.dataset.run;
@@ -347,6 +401,68 @@
     runCommand(cmd, { echo: true });
     termInput?.focus();
   });
+
+  const initPartyTrick = () => {
+    const root = document.querySelector("[data-party-trick]");
+    if (!root) return;
+
+    const cards = Array.from(root.querySelectorAll("[data-party-card]"));
+    const revealBtn = root.querySelector("[data-party-reveal]");
+    const resetBtn = root.querySelector("[data-party-reset]");
+    const resultEl = root.querySelector("[data-party-result]");
+
+    const reset = () => {
+      root.classList.remove("is-solved");
+      cards.forEach((card) => card.setAttribute("aria-pressed", "false"));
+      if (resultEl) {
+        resultEl.textContent = "";
+        resultEl.classList.remove("is-reveal");
+      }
+      if (revealBtn) revealBtn.hidden = false;
+      if (resetBtn) resetBtn.hidden = true;
+    };
+
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        if (root.classList.contains("is-solved")) return;
+        const on = card.getAttribute("aria-pressed") === "true";
+        card.setAttribute("aria-pressed", String(!on));
+      });
+    });
+
+    revealBtn?.addEventListener("click", async () => {
+      const selected = cards.filter((c) => c.getAttribute("aria-pressed") === "true");
+      const total = selected.reduce(
+        (sum, card) => sum + Number(card.dataset.value || 0),
+        0
+      );
+
+      root.classList.add("is-solved");
+      if (revealBtn) revealBtn.hidden = true;
+      if (resetBtn) resetBtn.hidden = false;
+
+      if (!resultEl) return;
+      resultEl.classList.remove("is-reveal");
+
+      if (total === 0) {
+        resultEl.textContent = "You didn’t pick any cards — try 1–15, then select the matches.";
+        resultEl.classList.add("is-reveal");
+        root.classList.remove("is-solved");
+        if (revealBtn) revealBtn.hidden = false;
+        if (resetBtn) resetBtn.hidden = true;
+        return;
+      }
+
+      resultEl.textContent = "Scanning bits…";
+      if (!reduceMotion) await sleep(450);
+      resultEl.textContent = `You’re thinking of ${total}.`;
+      resultEl.classList.add("is-reveal");
+
+      appendLine(`party-trick: guessed ${total} (binary mind reader)`, "term-line--dim");
+    });
+
+    resetBtn?.addEventListener("click", reset);
+  };
 
   termForm?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -501,18 +617,16 @@
     startUptime();
     startPhosphorSpot();
     startCodeRain();
+    initPartyTrick();
 
-    let initialView = "terminal";
+    // Always land on Terminal. Hash links (e.g. #experience) open Profile.
+    const initialView =
+      location.hash && document.querySelector(location.hash) ? "profile" : "terminal";
+
     try {
-      const saved = localStorage.getItem("mafaq-view");
-      if (saved === "profile" || saved === "terminal") initialView = saved;
+      localStorage.removeItem("mafaq-view");
     } catch {
       /* ignore */
-    }
-
-    // Hash deep-links open Profile view at that section
-    if (location.hash && document.querySelector(location.hash)) {
-      initialView = "profile";
     }
 
     setView(initialView);
@@ -520,10 +634,10 @@
 
     if (body.dataset.view === "terminal") {
       appendLine("MAFAQ portfolio shell — type a command or click one below.");
+      appendLine("Party trick loaded on the left: binary mind reader.", "term-line--dim");
       runCommand("help", { echo: true });
       termInput?.focus();
     }
   };
-
   init();
 })();
