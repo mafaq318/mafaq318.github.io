@@ -33,22 +33,19 @@
       summary: "Technical strengths",
     },
     education: {
-      summary: "Degrees and certifications",
+      summary: "Degrees",
     },
     contact: {
       summary: "Email and links",
     },
     cv: {
-      summary: "Open CV download",
+      summary: "Download CV (PDF)",
     },
     ls: {
       summary: "List sections",
     },
     joke: {
       summary: "Random programmer joke",
-    },
-    music: {
-      summary: "Toggle command beeps on/off",
     },
     clear: {
       summary: "Clear the terminal",
@@ -278,15 +275,24 @@
     return block;
   };
 
-  const appendLine = (text, className = "") => {
-    const safe = String(text)
+  const escapeHtml = (text) =>
+    String(text)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
+
+  const appendLine = (text, className = "") => {
+    const safe = escapeHtml(text);
     return appendBlock(
       `<pre class="term-line${className ? ` ${className}` : ""}">${safe}</pre>`
     );
   };
+
+  /** Highlight a whole line (degree names, job titles, etc.). */
+  const appendTitle = (text) =>
+    appendBlock(
+      `<pre class="term-line"><span class="term-accent">${escapeHtml(text)}</span></pre>`
+    );
 
   const cmdButton = (name) =>
     `<button type="button" class="term-cmd" data-run="${name}">${name}</button>`;
@@ -300,9 +306,8 @@
       .join("");
 
     appendBlock(`
-      <pre class="term-line term-line--dim">Available commands — click one or type it below:</pre>
       <div class="term-help">${rows}</div>
-      <pre class="term-line term-line--dim">Tip: try the <span class="term-accent">mind reader</span> on the left — or type <span class="term-accent">joke</span>.</pre>
+      <pre class="term-line term-line--dim">Tip: type <span class="term-accent">joke</span> for a programmer joke.</pre>
     `);
   };
 
@@ -330,44 +335,36 @@
 
   const content = {
     whoami() {
-      appendLine("Mohammad Afaq");
-      appendLine("Software Engineer / Design Lead — Embedded & Automotive");
+      appendTitle("Mohammad Afaq");
       appendLine("Oulu, Finland");
-      appendLine("");
-      appendLine(
-        "Hands-on with C/C++ (C++14/C++20), Python, Yocto, Adaptive AUTOSAR,"
-      );
-      appendLine(
-        "SDK maintenance, target testing, and CI/CD — focused on performance,"
-      );
-      appendLine("efficiency, and security.");
+      appendTitle("Software Engineer by heart");
     },
     experience() {
-      appendLine("Elektrobit Automotive Finland Oy — Software Engineer / Design Lead");
+      appendTitle("Elektrobit Automotive Finland Oy — Software Engineer / Design Lead");
       appendLine("Oct 2022 – Present · Oulu, Finland");
       appendLine("  · Lead design/ownership of two Adaptive AUTOSAR components");
       appendLine("  · Production C++ Adaptive apps (security, reliability, performance)");
       appendLine("  · Coverage, unit/integration/fuzz testing (GTest, Robot Framework)");
       appendLine("  · Cross-component coordination across the build system");
       appendLine("");
-      appendLine("Teradata Global Consulting — Associate Consultant");
+      appendTitle("Teradata Global Consulting — Associate Consultant");
       appendLine("Sept 2021 – Aug 2022 · Islamabad, Pakistan");
       appendLine("  · Enterprise ETL/DCM for retail clients");
       appendLine("  · SQL ops, Azure integration, workflow automation");
       appendLine("");
-      appendLine("Educative Inc — Technical Engineer");
+      appendTitle("Educative Inc — Technical Engineer");
       appendLine("June 2021 – Sept 2021 · Lahore, Pakistan");
       appendLine("  · Docker, Kubernetes, shell scripting, Elixir testing");
     },
     projects() {
-      appendLine("[elektrobit] Volkswagen ICAS1 Program");
+      appendTitle("[elektrobit] Volkswagen ICAS1 Program");
       appendLine("  Embedded C++ (C++14/C++20) for VW software-defined vehicle platform");
       appendLine("  Feature work, C++20 migration, Linux/SDK stack maintenance");
       appendLine("");
-      appendLine("[thesis/msc] Model Quantization for Efficient DMS Analysis");
+      appendTitle("[thesis/msc] Model Quantization for Efficient DMS Analysis");
       appendLine("  Attention mechanisms + U-Net; quantization for embedded inference");
       appendLine("");
-      appendLine("[thesis/bsc] Motion Artifact Removal from PPG Data");
+      appendTitle("[thesis/bsc] Motion Artifact Removal from PPG Data");
       appendLine("  Real-time overlapping-window algorithm for heart-rate accuracy");
     },
     skills() {
@@ -379,26 +376,19 @@
       appendLine("Practices     Agile/Scrum, Jira, code reviews, SwDD/SwAD docs");
     },
     education() {
-      appendLine("M.Sc. (Technology) in Computing Sciences");
-      appendLine("Tampere University · Aug 2022 – Mar 2026");
+      appendTitle("M.Sc. (Technology) in Computing Sciences");
+      appendLine("Tampere University · 2026");
       appendLine("Major: Signal Processing and Machine Learning");
       appendLine("");
-      appendLine("B.Sc. in Electrical Engineering");
-      appendLine("LUMS · Sept 2017 – May 2021");
-      appendLine("");
-      appendLine("Certifications:");
-      appendLine("  · CMake for Cross-Platform C++ Project Building");
-      appendLine("  · Teradata Vantage Associate");
-      appendLine("  · Microsoft Azure Fundamentals");
-      appendLine("  · 2023 Web Development Bootcamp");
-      appendLine("  · C++ Unit Testing: Google Test and Google Mock");
+      appendTitle("B.Sc. in Electrical Engineering");
+      appendLine("LUMS · 2021");
     },
     contact() {
       appendBlock(`
         <pre class="term-line">Email     <a href="mailto:mafaqq318@gmail.com">mafaqq318@gmail.com</a></pre>
         <pre class="term-line">GitHub    <a href="https://github.com/mafaq318" target="_blank" rel="noopener noreferrer">github.com/mafaq318</a></pre>
         <pre class="term-line">LinkedIn  <a href="https://www.linkedin.com/in/mafaq" target="_blank" rel="noopener noreferrer">linkedin.com/in/mafaq</a></pre>
-        <pre class="term-line">CV        <a href="docs/AFAQ_MOHAMMAD_CV.pdf" download>docs/AFAQ_MOHAMMAD_CV.pdf</a></pre>
+        <pre class="term-line">CV        <a href="docs/AFAQ_MOHAMMAD_CV.pdf" download>download now</a></pre>
       `);
     },
     ls() {
@@ -413,7 +403,7 @@
 
     if (echo) {
       appendBlock(`
-        <pre class="term-line term-line--cmd"><span class="term-prompt-inline">visitor@mafaq318:~$</span> ${input
+        <pre class="term-line term-line--cmd"><span class="term-prompt-inline">visitor@afaq_os:~$</span> ${input
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")}</pre>
@@ -441,9 +431,6 @@
       funny: "joke",
       partytrick: "joke",
       "party-trick": "joke",
-      bgm: "music",
-      sfx: "music",
-      beep: "music",
     };
 
     let cmd = aliases[name] || name;
@@ -465,16 +452,6 @@
       tellJoke();
       return;
     }
-    if (cmd === "music" || cmd === "mute" || cmd === "unmute" || cmd === "sfx") {
-      const nextOn =
-        cmd === "mute" ? false : cmd === "unmute" ? true : !termSfx?.enabled();
-      termSfx?.setEnabled(nextOn);
-      appendLine(
-        nextOn ? "command beeps: on" : "command beeps: off",
-        "term-line--dim"
-      );
-      return;
-    }
     if (cmd === "cv") {
       appendLine("Opening CV download…");
       const link = document.createElement("a");
@@ -493,10 +470,10 @@
       return;
     }
 
-    // Cheeky replies for power-user / doomsday commands
-    const hirePun = matchHirePun(input, name, args);
-    if (hirePun) {
-      hirePun.forEach((line, i) =>
+    // Light replies for classic unix mischief
+    const joke = matchShellJoke(input, name, args);
+    if (joke) {
+      joke.forEach((line, i) =>
         appendLine(line, i === 0 ? "term-line--warn" : "term-line--dim")
       );
       return;
@@ -506,7 +483,7 @@
     appendLine('Type "help" to see available commands.', "term-line--dim");
   };
 
-  const HIRE_PUNS = [
+  const SHELL_JOKES = [
     {
       test: (input, name, args) =>
         name === "sudo" ||
@@ -514,8 +491,8 @@
         input.includes("sudo root") ||
         (name === "root" && !args.length),
       lines: [
-        "Permission denied: ego too large, offer letter too small.",
-        "So soon? Hire me as root and I’ll grant you sudo on delivery.",
+        "sudo: nice try, visitor.",
+        "With great power comes… a polite “no”.",
       ],
     },
     {
@@ -526,44 +503,44 @@
         name === "poweroff" ||
         name === "init",
       lines: [
-        "shutdown: Access denied — this shell is still in probation.",
-        "Shutting down already? Hire me first; I come with uptime SLAs.",
+        "shutdown: denied. This shell runs on caffeine, not ACPI.",
+        "Try `clear` — same drama, fewer angry fans.",
       ],
     },
     {
       test: (input, name, args) =>
         name === "rm" && args.some((a) => a === "-rf" || a === "-fr" || a.startsWith("/")),
       lines: [
-        "rm: refusing to delete the only engineer in the room.",
-        "Nice try. Hire me and I’ll rm technical debt instead.",
+        "rm: whoa there, cowboy.",
+        "I only delete bugs, and even those I unit-test first.",
       ],
     },
     {
       test: (input, name) =>
         name === "kill" || name === "killall" || name === "pkill",
       lines: [
-        "kill: process 'mafaq' is protected (SIGHIRE).",
-        "Don’t kill the vibe — hire me and we’ll SIGTERM the backlog.",
+        "kill: target process filed a restraining order.",
+        "How about `whoami` instead? Harmless, and mildly flattering.",
       ],
     },
     {
       test: (input, name) => name === "forkbomb" || input.includes(":(){"),
       lines: [
-        "forkbomb detected. Redirecting energy into job applications…",
-        "So soon? Hire me — I scale better than `ulimit -u`.",
+        "forkbomb: cute. My laptop already has enough tabs open.",
+        "Process limit reached: one curious visitor at a time.",
       ],
     },
     {
       test: (input, name) => name === "exit" || name === "logout" || name === "quit",
       lines: [
-        "exit: session sticky. Recruiter cookies enabled.",
-        "Leaving already? Hire me and I’ll stick around for the long run.",
+        "exit: leaving so soon? The prompt looks lonely.",
+        "Type `profile` for the fancy view, or stick around and type `joke`.",
       ],
     },
   ];
 
-  const matchHirePun = (input, name, args) => {
-    const hit = HIRE_PUNS.find((entry) => entry.test(input.toLowerCase(), name, args));
+  const matchShellJoke = (input, name, args) => {
+    const hit = SHELL_JOKES.find((entry) => entry.test(input.toLowerCase(), name, args));
     return hit ? hit.lines : null;
   };
 
@@ -575,108 +552,6 @@
     runCommand(cmd, { echo: true });
     termInput?.focus();
   });
-
-  const initPartyTrick = () => {
-    const root = document.querySelector("[data-party-trick]");
-    if (!root) return;
-
-    const cardsEl = root.querySelector(".party-trick__cards");
-    const revealBtn = root.querySelector("[data-party-reveal]");
-    const resetBtn = root.querySelector("[data-party-reset]");
-    const resultEl = root.querySelector("[data-party-result]");
-
-    const getCards = () => Array.from(root.querySelectorAll("[data-party-card]"));
-
-    const shuffleCards = () => {
-      if (!cardsEl) return;
-      const cards = getCards();
-      for (let i = cards.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [cards[i], cards[j]] = [cards[j], cards[i]];
-      }
-      // Avoid landing on the exact previous order
-      const sameOrder =
-        cards.length > 1 &&
-        cards.every((card, index) => card === cardsEl.children[index]);
-      if (sameOrder) {
-        cards.push(cards.shift());
-      }
-      cards.forEach((card) => cardsEl.appendChild(card));
-    };
-
-    const reset = async () => {
-      root.classList.remove("is-solved");
-      getCards().forEach((card) => card.setAttribute("aria-pressed", "false"));
-      if (resultEl) {
-        resultEl.textContent = "";
-        resultEl.classList.remove("is-reveal");
-      }
-
-      if (!reduceMotion && cardsEl) {
-        root.classList.add("is-shuffling");
-        if (resultEl) resultEl.textContent = "Shuffling cards…";
-        await sleep(280);
-        shuffleCards();
-        await sleep(220);
-        root.classList.remove("is-shuffling");
-        if (resultEl) resultEl.textContent = "";
-      } else {
-        shuffleCards();
-      }
-
-      if (revealBtn) revealBtn.hidden = false;
-      if (resetBtn) resetBtn.hidden = true;
-    };
-
-    root.addEventListener("click", (event) => {
-      const card =
-        event.target instanceof Element
-          ? event.target.closest("[data-party-card]")
-          : null;
-      if (!card || !root.contains(card)) return;
-      if (root.classList.contains("is-solved") || root.classList.contains("is-shuffling")) {
-        return;
-      }
-      const on = card.getAttribute("aria-pressed") === "true";
-      card.setAttribute("aria-pressed", String(!on));
-    });
-
-    revealBtn?.addEventListener("click", async () => {
-      const cards = getCards();
-      const selected = cards.filter((c) => c.getAttribute("aria-pressed") === "true");
-      const total = selected.reduce(
-        (sum, card) => sum + Number(card.dataset.value || 0),
-        0
-      );
-
-      root.classList.add("is-solved");
-      if (revealBtn) revealBtn.hidden = true;
-      if (resetBtn) resetBtn.hidden = false;
-
-      if (!resultEl) return;
-      resultEl.classList.remove("is-reveal");
-
-      if (total === 0) {
-        resultEl.textContent = "You didn’t pick any cards — try 1–15, then select the matches.";
-        resultEl.classList.add("is-reveal");
-        root.classList.remove("is-solved");
-        if (revealBtn) revealBtn.hidden = false;
-        if (resetBtn) resetBtn.hidden = true;
-        return;
-      }
-
-      resultEl.textContent = "Scanning bits…";
-      if (!reduceMotion) await sleep(450);
-      resultEl.textContent = `You’re thinking of ${total}.`;
-      resultEl.classList.add("is-reveal");
-
-      appendLine(`mind-reader: guessed ${total}`, "term-line--dim");
-    });
-
-    resetBtn?.addEventListener("click", () => {
-      void reset();
-    });
-  };
 
   termForm?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -698,7 +573,8 @@
     if (event.key === "ArrowDown") {
       event.preventDefault();
       historyIndex = Math.min(history.length, historyIndex + 1);
-      termInput.value = historyIndex === history.length ? "" : history[historyIndex] || "";
+      termInput.value =
+        historyIndex === history.length ? "" : history[historyIndex] || "";
     }
   });
 
@@ -729,7 +605,7 @@
 
     document.body.classList.add("is-booting");
     const lines = [
-      "MAFAQ-OS v1.9.26",
+      "AFAQ-OS v1.9.26",
       "Mounting portfolio shell .... OK",
       "Starting interactive terminal .... OK",
       "",
@@ -759,72 +635,6 @@
     };
     tick();
     setInterval(tick, 1000);
-  };
-
-  const startPhosphorSpot = () => {
-    const spot = document.querySelector("[data-phosphor]");
-    if (!spot || reduceMotion) return;
-    let raf = 0;
-    let targetX = window.innerWidth / 2;
-    let targetY = window.innerHeight / 2;
-    let x = targetX;
-    let y = targetY;
-    const render = () => {
-      x += (targetX - x) * 0.12;
-      y += (targetY - y) * 0.12;
-      spot.style.left = `${x}px`;
-      spot.style.top = `${y}px`;
-      raf = requestAnimationFrame(render);
-    };
-    window.addEventListener(
-      "pointermove",
-      (event) => {
-        targetX = event.clientX;
-        targetY = event.clientY;
-        spot.classList.add("is-on");
-      },
-      { passive: true }
-    );
-    window.addEventListener("pointerleave", () => spot.classList.remove("is-on"), {
-      passive: true,
-    });
-    raf = requestAnimationFrame(render);
-    window.addEventListener("beforeunload", () => cancelAnimationFrame(raf));
-  };
-
-  const startCodeRain = () => {
-    const canvas = document.querySelector("[data-code-rain]");
-    if (!(canvas instanceof HTMLCanvasElement) || reduceMotion) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const glyphs = "01<>[]{};:/\\$#*+=C++AUTOSARYOCTO";
-    let columns = [];
-    let width = 0;
-    let height = 0;
-    let fontSize = 14;
-    const resize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-      fontSize = width < 700 ? 12 : 14;
-      columns = Array.from({ length: Math.floor(width / fontSize) }, () => Math.random() * -40);
-    };
-    const draw = () => {
-      ctx.fillStyle = "rgba(15, 10, 5, 0.08)";
-      ctx.fillRect(0, 0, width, height);
-      ctx.fillStyle = "rgba(255, 176, 0, 0.75)";
-      ctx.font = `${fontSize}px "IBM Plex Mono", monospace`;
-      columns.forEach((y, index) => {
-        const char = glyphs[Math.floor(Math.random() * glyphs.length)];
-        ctx.fillText(char, index * fontSize, y * fontSize);
-        columns[index] = y * fontSize > height && Math.random() > 0.975 ? 0 : y + 1;
-      });
-      requestAnimationFrame(draw);
-    };
-    resize();
-    window.addEventListener("resize", resize, { passive: true });
-    requestAnimationFrame(draw);
   };
 
   const createTermSfx = () => {
@@ -869,7 +679,6 @@
       osc.stop(when + dur + 0.03);
     };
 
-    // Classic retro “command accepted” two-note blip
     const blip = () => {
       if (!enabled || reduceMotion) return;
       void ensureCtx().then((ok) => {
@@ -978,7 +787,6 @@
 
   const init = async () => {
     startUptime();
-    initPartyTrick();
     hackerizeTerminalPortrait();
 
     // Always land on Terminal. Hash links (e.g. #experience) open Profile.
@@ -995,8 +803,7 @@
     await boot();
 
     if (body.dataset.view === "terminal") {
-      appendLine("MAFAQ portfolio shell — type a command or click one below.");
-      appendLine("Mind reader loaded on the left — pick a number from 1–15.", "term-line--dim");
+      appendLine("AFAQ's shell — type a command or click one below.");
       runCommand("help", { echo: true, sfx: false });
       termInput?.focus();
     } else if (location.hash) {
