@@ -1,5 +1,9 @@
 (() => {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Touch / coarse pointers: never autofocus the shell input (opens mobile keyboard).
+  const isTouchUi =
+    window.matchMedia("(hover: none)").matches ||
+    window.matchMedia("(pointer: coarse)").matches;
   const body = document.body;
   const header = document.querySelector("[data-header]");
   const termOutput = document.querySelector("[data-term-output]");
@@ -15,6 +19,11 @@
 
   const history = [];
   let historyIndex = -1;
+
+  const focusTermInput = () => {
+    if (!termInput || isTouchUi) return;
+    termInput.focus({ preventScroll: true });
+  };
 
   const COMMANDS = {
     help: {
@@ -105,6 +114,9 @@
     });
   };
 
+  /** @type {{ setActive: (on: boolean) => void } | null} */
+  let heroConstellation = null;
+
   const setView = (view, { scrollTop = true } = {}) => {
     const next = view === "profile" ? "profile" : "terminal";
     body.dataset.view = next;
@@ -116,9 +128,11 @@
       btn.classList.toggle("is-active", btn.dataset.viewBtn === next);
     });
 
+    heroConstellation?.setActive(next === "profile");
+
     if (next === "terminal") {
       closeProfileMenu();
-      requestAnimationFrame(() => termInput?.focus());
+      requestAnimationFrame(() => focusTermInput());
     } else {
       revealProfileContent();
       if (scrollTop) {
@@ -212,7 +226,7 @@
     if (body.dataset.view === "terminal") {
       event.preventDefault();
       runCommand("help", { echo: true });
-      termInput?.focus();
+      focusTermInput();
     } else {
       event.preventDefault();
       setView("profile");
@@ -550,7 +564,7 @@
     const cmd = target.dataset.run;
     if (!cmd) return;
     runCommand(cmd, { echo: true });
-    termInput?.focus();
+    focusTermInput();
   });
 
   termForm?.addEventListener("submit", (event) => {
@@ -578,12 +592,12 @@
     }
   });
 
-  // Keep focus in the terminal when clicking the window background
+  // Keep focus in the terminal when clicking the window background (desktop only)
   document.querySelector(".term-window")?.addEventListener("click", (event) => {
-    if (body.dataset.view !== "terminal") return;
+    if (body.dataset.view !== "terminal" || isTouchUi) return;
     const target = event.target;
-    if (target instanceof HTMLElement && target.closest("a, button")) return;
-    termInput?.focus();
+    if (target instanceof HTMLElement && target.closest("a, button, input")) return;
+    focusTermInput();
   });
 
   const dismissBoot = async (bootEl) => {
@@ -714,6 +728,285 @@
 
   const termSfx = createTermSfx();
 
+  const initHeroConstellation = () => {
+    const hero = document.querySelector(".hero");
+    const canvas = document.querySelector("[data-hero-constellation]");
+    if (!(hero instanceof HTMLElement) || !(canvas instanceof HTMLCanvasElement)) {
+      return null;
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    /** @type {{ x: number, y: number, vx: number, vy: number, r: number }[]} */
+    let nodes = [];
+    let w = 0;
+    let h = 0;
+    let dpr = 1;
+    let raf = 0;
+    let active = false;
+    let pointerInside = false;
+    let pointerX = 0;
+    let pointerY = 0;
+
+    const nodeCount = () => {
+      if (w < 520) return 48;
+      if (w < 900) return 70;
+      return 92;
+    };
+
+    const seedNodes = () => {
+      const count = nodeCount();
+      nodes = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: 1.6 + Math.random() * 2.2,
+      }));
+    };
+
+    const resize = () => {
+      const rect = hero.getBoundingClientRect();
+      w = Math.max(1, Math.floor(rect.width));
+      h = Math.max(1, Math.floor(rect.height));
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      seedNodes();
+      if (reduceMotion) paintStatic();
+    };
+
+    const paintStatic = () => {
+      ctx.clearRect(0, 0, w, h);
+      const linkDist = Math.min(180, w * 0.24);
+      for (let i = 0; i < nodes.length; i += 1) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j += 1) {
+          const b = nodes[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > linkDist) continue;
+          const alpha = (1 - dist / linkDist) * 0.42;
+          ctx.strokeStyle = `rgba(100, 210, 255, ${alpha})`;
+          ctx.lineWidth = 1.15;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+      for (const n of nodes) {
+        ctx.fillStyle = "rgba(48, 209, 88, 0.75)";
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    const tick = () => {
+      if (!active) return;
+      ctx.clearRect(0, 0, w, h);
+
+      const linkDist = Math.min(190, w * 0.26);
+      const attractR = 220;
+
+      for (const n of nodes) {
+        if (pointerInside) {
+          const dx = pointerX - n.x;
+          const dy = pointerY - n.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          if (dist < attractR) {
+            const pull = (1 - dist / attractR) * 0.06;
+            n.vx += (dx / dist) * pull;
+            n.vy += (dy / dist) * pull;
+          }
+        }
+
+        // Idle drift + damping
+        n.vx += (Math.random() - 0.5) * 0.018;
+        n.vy += (Math.random() - 0.5) * 0.018;
+        n.vx *= 0.982;
+        n.vy *= 0.982;
+
+        const speed = Math.hypot(n.vx, n.vy);
+        if (speed > 1.15) {
+          n.vx = (n.vx / speed) * 1.15;
+          n.vy = (n.vy / speed) * 1.15;
+        }
+
+        n.x += n.vx;
+        n.y += n.vy;
+
+        if (n.x < 0) n.x = w;
+        if (n.x > w) n.x = 0;
+        if (n.y < 0) n.y = h;
+        if (n.y > h) n.y = 0;
+      }
+
+      for (let i = 0; i < nodes.length; i += 1) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j += 1) {
+          const b = nodes[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > linkDist) continue;
+
+          let alpha = (1 - dist / linkDist) * 0.5;
+          if (pointerInside) {
+            const mx = (a.x + b.x) / 2;
+            const my = (a.y + b.y) / 2;
+            const toPtr = Math.hypot(mx - pointerX, my - pointerY);
+            if (toPtr < attractR) {
+              alpha += (1 - toPtr / attractR) * 0.65;
+            }
+          }
+
+          const nearCyan = pointerInside && alpha > 0.4;
+          ctx.strokeStyle = nearCyan
+            ? `rgba(100, 210, 255, ${Math.min(alpha, 0.95)})`
+            : `rgba(48, 209, 88, ${Math.min(alpha, 0.78)})`;
+          ctx.lineWidth = nearCyan ? 1.6 : 1.2;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      for (const n of nodes) {
+        let glow = 0.72;
+        if (pointerInside) {
+          const d = Math.hypot(n.x - pointerX, n.y - pointerY);
+          if (d < attractR) glow = 0.72 + (1 - d / attractR) * 0.28;
+        }
+        ctx.fillStyle = `rgba(48, 209, 88, ${glow})`;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fill();
+        if (glow > 0.82) {
+          ctx.fillStyle = `rgba(100, 210, 255, ${(glow - 0.72) * 1.4})`;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r + 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    const setActive = (on) => {
+      active = Boolean(on);
+      cancelAnimationFrame(raf);
+      if (!active) return;
+      resize();
+      if (reduceMotion) {
+        paintStatic();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    if (!reduceMotion) {
+      hero.addEventListener(
+        "pointermove",
+        (event) => {
+          if (!active) return;
+          const rect = hero.getBoundingClientRect();
+          pointerInside = true;
+          pointerX = event.clientX - rect.left;
+          pointerY = event.clientY - rect.top;
+        },
+        { passive: true }
+      );
+      hero.addEventListener(
+        "pointerleave",
+        () => {
+          pointerInside = false;
+        },
+        { passive: true }
+      );
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => {
+        if (!active) return;
+        resize();
+        if (reduceMotion) paintStatic();
+      });
+      ro.observe(hero);
+    } else {
+      window.addEventListener(
+        "resize",
+        () => {
+          if (!active) return;
+          resize();
+          if (reduceMotion) paintStatic();
+        },
+        { passive: true }
+      );
+    }
+
+    return { setActive };
+  };
+
+  const initPortraitTilt = () => {
+    const figures = Array.from(document.querySelectorAll("[data-portrait-tilt]"));
+    if (!figures.length || reduceMotion) return;
+
+    const maxTilt = 11;
+    const maxShift = 8;
+
+    figures.forEach((figure) => {
+      if (!(figure instanceof HTMLElement)) return;
+      const bezel = figure.querySelector(".crt-portrait__bezel");
+      if (!(bezel instanceof HTMLElement)) return;
+
+      const reset = () => {
+        figure.classList.remove("is-hot");
+        figure.style.setProperty("--tilt-x", "0deg");
+        figure.style.setProperty("--tilt-y", "0deg");
+        figure.style.setProperty("--glare-a", "0");
+        figure.style.setProperty("--glare-x", "50%");
+        figure.style.setProperty("--glare-y", "40%");
+        figure.style.setProperty("--img-x", "0px");
+        figure.style.setProperty("--img-y", "0px");
+      };
+
+      figure.addEventListener(
+        "pointermove",
+        (event) => {
+          const rect = figure.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          const px = (event.clientX - rect.left) / rect.width;
+          const py = (event.clientY - rect.top) / rect.height;
+          const nx = Math.min(1, Math.max(0, px));
+          const ny = Math.min(1, Math.max(0, py));
+          const tiltY = (nx - 0.5) * (maxTilt * 2);
+          const tiltX = (0.5 - ny) * (maxTilt * 2);
+
+          figure.classList.add("is-hot");
+          figure.style.setProperty("--tilt-x", `${tiltX.toFixed(2)}deg`);
+          figure.style.setProperty("--tilt-y", `${tiltY.toFixed(2)}deg`);
+          figure.style.setProperty("--glare-x", `${(nx * 100).toFixed(1)}%`);
+          figure.style.setProperty("--glare-y", `${(ny * 100).toFixed(1)}%`);
+          figure.style.setProperty("--glare-a", "1");
+          figure.style.setProperty("--img-x", `${((0.5 - nx) * maxShift).toFixed(2)}px`);
+          figure.style.setProperty("--img-y", `${((0.5 - ny) * maxShift).toFixed(2)}px`);
+        },
+        { passive: true }
+      );
+
+      figure.addEventListener("pointerleave", reset, { passive: true });
+      figure.addEventListener("pointercancel", reset, { passive: true });
+    });
+  };
+
   const hackerizeTerminalPortrait = () => {
     const img = document.querySelector(".crt-portrait--hacker img");
     if (!img || img.dataset.hackerized === "1") return;
@@ -788,6 +1081,8 @@
   const init = async () => {
     startUptime();
     hackerizeTerminalPortrait();
+    initPortraitTilt();
+    heroConstellation = initHeroConstellation();
 
     // Always land on Terminal. Hash links (e.g. #experience) open Profile.
     const initialView =
@@ -805,7 +1100,7 @@
     if (body.dataset.view === "terminal") {
       appendLine("AFAQ's shell — type a command or click one below.");
       runCommand("help", { echo: true, sfx: false });
-      termInput?.focus();
+      focusTermInput();
     } else if (location.hash) {
       const section = document.querySelector(location.hash);
       requestAnimationFrame(() => scrollToSection(section));
