@@ -27,7 +27,7 @@
     />
     <link rel="stylesheet" href="styles.css?v=56" />
   </head>
-  <body data-view="terminal">
+  <body data-view="profile">
     <div class="crt-overlay" aria-hidden="true">
       <div class="crt-overlay__scanlines"></div>
       <div class="crt-overlay__vignette"></div>
@@ -35,7 +35,7 @@
     <canvas class="code-rain" data-code-rain aria-hidden="true"></canvas>
     <div class="phosphor-spot" data-phosphor aria-hidden="true"></div>
 
-    <div class="boot-screen" data-boot aria-hidden="true">
+    <div class="boot-screen" data-boot aria-hidden="true" hidden>
       <pre class="boot-screen__log" data-boot-log></pre>
     </div>
 
@@ -50,14 +50,14 @@
           <a class="site-logo" href="#top" data-home>mafaq@oulu:~$</a>
 
           <div class="view-switch" role="group" aria-label="Site view">
-            <button type="button" class="view-switch__btn is-active" data-view-btn="terminal">
+            <button type="button" class="view-switch__btn" data-view-btn="terminal">
               Terminal
             </button>
 
             <div class="profile-menu" data-profile-menu>
               <button
                 type="button"
-                class="view-switch__btn view-switch__btn--profile"
+                class="view-switch__btn view-switch__btn--profile is-active"
                 data-view-btn="profile"
                 data-profile-trigger
                 aria-haspopup="true"
@@ -85,11 +85,12 @@
       </header>
 
       <main id="main">
-        <!-- Terminal view (default) -->
+        <!-- Optional Terminal view -->
         <section
           class="term-view"
           id="view-terminal"
           data-term-view
+          hidden
           aria-label="Terminal"
         >
           <div class="term-window">
@@ -172,8 +173,8 @@
           </div>
         </section>
 
-        <!-- Profile view -->
-        <div class="profile-view" id="view-profile" data-profile-view hidden>
+        <!-- Profile view (default) -->
+        <div class="profile-view" id="view-profile" data-profile-view>
           <section class="hero" id="top" aria-label="Introduction">
             <canvas
               class="hero__constellation"
@@ -333,6 +334,12 @@
 
               <div class="project-list">
                 <article class="project reveal" data-reveal>
+                  <p class="project__label">Public project</p>
+                  <h3>Interactive Engineering Portfolio</h3>
+                  <p>A responsive portfolio built with HTML, CSS, and JavaScript, with a recruiter-friendly Profile view and an interactive Terminal experience.</p>
+                  <p><a href="https://github.com/mafaq318/mafaq318.github.io" target="_blank" rel="noopener noreferrer">Explore portfolio source on GitHub</a></p>
+                </article>
+                <article class="project reveal" data-reveal>
                   <p class="project__label">Elektrobit</p>
                   <h3>Volkswagen ICAS1 Program</h3>
                   <ul>
@@ -377,6 +384,7 @@
                     Detection and Removal of Motion Artifacts from Photoplethysmogram
                     (PPG) Data
                   </h3>
+                  <p><a href="https://github.com/mafaq318/Motion-Artifacts-Detection-in-PPG-Signal" target="_blank" rel="noopener noreferrer">Explore MATLAB project on GitHub</a> · See the repository's data and privacy notes before reusing research artifacts.</p>
                   <ul>
                     <li>
                       Processed and analyzed PPG sensor data affected by motion and
@@ -544,6 +552,6 @@
       </main>
     </div>
 
-    <script src="script.js?v=56" defer></script>
+    <script src="script.js?v=57" defer></script>
   </body>
 </html>
