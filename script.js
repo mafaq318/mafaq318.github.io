@@ -1084,9 +1084,8 @@
     initPortraitTilt();
     heroConstellation = initHeroConstellation();
 
-    // Always land on Terminal. Hash links (e.g. #experience) open Profile.
-    const initialView =
-      location.hash && document.querySelector(location.hash) ? "profile" : "terminal";
+    // Open Profile immediately so experience and project links are easy to find.
+    const initialView = "profile";
 
     try {
       localStorage.removeItem("mafaq-view");
@@ -1095,14 +1094,17 @@
     }
 
     setView(initialView, { scrollTop: !location.hash });
-    await boot();
+    // Keep the terminal boot animation off the recruiter-facing landing view.
+    const bootEl = document.querySelector("[data-boot]");
+    if (bootEl) bootEl.hidden = true;
+
+    appendLine("AFAQ's shell — type a command or click one below.");
+    runCommand("help", { echo: true, sfx: false });
 
     if (body.dataset.view === "terminal") {
-      appendLine("AFAQ's shell — type a command or click one below.");
-      runCommand("help", { echo: true, sfx: false });
       focusTermInput();
     } else if (location.hash) {
-      const section = document.querySelector(location.hash);
+      const section = document.getElementById(location.hash.slice(1));
       requestAnimationFrame(() => scrollToSection(section));
     }
   };
