@@ -1,23 +1,25 @@
 # mafaq318.github.io
 
-Personal site for [Mohammad Afaq](https://mafaq318.github.io) — Software Engineer / Design Lead focused on embedded and automotive software.
+My personal portfolio — C++, embedded Linux, automotive software, and applied ML research.
 
-Static HTML, CSS, and JavaScript, hosted with GitHub Pages. Default view is an interactive terminal (`help` lists commands); switch to **Profile** in the top bar for a standard page layout.
+Plain HTML, CSS, and JavaScript. Hosted on GitHub Pages.
 
-## Preview locally
+## Run locally
 
-```bash
+```sh
 python3 -m http.server 8080
 ```
 
-Open [http://localhost:8080](http://localhost:8080).
+Open http://localhost:8080.
 
-## Files
+## A few details
 
-| Path | Description |
-|------|-------------|
-| `index.html` | Page content |
-| `styles.css` | Layout and theme |
-| `script.js` | Interaction and effects |
-| `assets/portrait.jpg` | Profile photo |
-| `docs/AFAQ_MOHAMMAD_CV.pdf` | CV download |
+- Profile-first layout with an animated ASCII signal in the hero.
+- Optional terminal with `help`, `whoami`, `projects`, `experience`, `skills`, `education`, `contact`, and `cv` commands.
+- Quick navigation with Ctrl/Cmd + K or the menu button.
+- Motion can be paused and respects reduced-motion settings. Animation stops when the hero is offscreen or the tab is hidden.
+- Content stays readable without JavaScript.
+
+The CV download lives at `docs/AFAQ_MOHAMMAD_CV.pdf`. Page content is in `index.html`; styles and interactions are in `styles.css` and `script.js`.
+
+ASCII motion inspiration: [jess.vc](https://www.jess.vc/). The signal animation here is an original canvas implementation.
