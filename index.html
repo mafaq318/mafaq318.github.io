@@ -11,19 +11,25 @@
   <meta property="og:url" content="https://mafaq318.github.io/">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://mafaq318.github.io/assets/portrait.jpg">
-  <link rel="stylesheet" href="styles.css?v=58">
-  <script src="script.js?v=58" defer></script>
+  <script>
+    try { document.documentElement.dataset.theme = localStorage.getItem('afaq-theme') === 'light' ? 'light' : 'dark'; } catch { document.documentElement.dataset.theme = 'dark'; }
+  </script>
+  <link rel="stylesheet" href="styles.css?v=59">
+  <script src="shell.js?v=1" defer></script>
+  <script src="script.js?v=59" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+  <div id="portfolio-pane">
   <header class="header">
-    <a class="wordmark" href="#top" aria-label="Afaq, home">afaq<span>_</span></a>
+    <div class="header-brand"><a class="wordmark" href="#top" aria-label="Afaq, home">afaq<span>_</span></a><a class="contact-link" href="#contact">Let’s talk <span aria-hidden="true">↗</span></a></div>
     <nav aria-label="Main navigation">
       <a href="#projects">Work</a><a href="#experience">Experience</a><a href="#about">About</a>
     </nav>
     <div class="header-actions">
+      <button id="theme-toggle" class="theme-toggle" hidden aria-label="Switch to light theme" title="Switch to light theme">☀</button>
       <button class="command-trigger" data-palette hidden aria-label="Open command menu">⌘ <span>K</span></button>
-      <a class="contact-link" href="#contact">Let’s talk <span aria-hidden="true">↗</span></a>
+      
     </div>
   </header>
 
@@ -35,10 +41,10 @@
         <h1 id="hero-title">Mohammad<br><span>Afaq.</span></h1>
         <p class="hero-statement">Close to the system.<br>Curious about everything.</p>
         <p class="hero-description">I build software where architecture, performance, and hardware meet. Mostly C++ and Linux. Always learning.</p>
-        <div class="actions"><a class="button primary" href="#projects">Explore my work <span aria-hidden="true">↘</span></a><a class="button secondary" href="docs/AFAQ_MOHAMMAD_CV.pdf" download>Download CV <span aria-hidden="true">↓</span></a></div>
+        <div class="actions"><button class="button terminal-link terminal-launch" data-terminal hidden><span aria-hidden="true">&gt;_</span> Open terminal <span class="shell-badge">TRY ME</span></button><a class="button primary" href="#projects">Explore my work <span aria-hidden="true">↘</span></a><a class="button secondary" href="docs/AFAQ_MOHAMMAD_CV.pdf" download>Download CV <span aria-hidden="true">↓</span></a></div>
       </div>
       <div class="signal-caption" aria-hidden="true"><span>01 / SIGNAL FIELD</span><span>C++ · LINUX · EMBEDDED</span></div>
-      <div class="hero-bottom"><a href="#projects">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a><button class="motion-toggle" id="motion-toggle" hidden aria-pressed="false">Pause motion</button><button class="terminal-link" data-terminal hidden><span aria-hidden="true">&gt;_</span> More of a terminal person?</button></div>
+      <div class="hero-bottom"><a href="#projects">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a><button class="motion-toggle" id="motion-toggle" hidden aria-pressed="false">Pause motion</button><button class="terminal-link" data-terminal hidden><span aria-hidden="true">&gt;_</span> Open terminal</button></div>
     </section>
 
     <section class="section" id="projects" aria-labelledby="projects-title">
@@ -77,7 +83,25 @@
   </main>
   <footer><a class="wordmark" href="#top">afaq<span>_</span></a><p>Built with curiosity. From Oulu, Finland.</p><a href="#top">Back to top ↑</a></footer>
 
-  <dialog id="terminal" aria-labelledby="terminal-title"><div class="dialog-header"><h2 id="terminal-title"><span aria-hidden="true">&gt;_</span> afaq@portfolio:~</h2><button data-close aria-label="Close terminal">×</button></div><div id="terminal-output" role="log" aria-live="polite" aria-label="Terminal output"></div><form id="terminal-form"><label for="terminal-input">visitor:~$</label><input id="terminal-input" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command"><button type="submit">Run ↵</button></form><p class="dialog-note">A small portfolio shell. Type help to explore. Esc to close.</p></dialog>
+  </div>
+
+  <dialog id="terminal" aria-labelledby="terminal-title"><div class="dialog-header"><h2 id="terminal-title">visitor@afaq-linux: ~</h2><button data-close aria-label="Close terminal">×</button></div><div id="terminal-output" role="log" aria-live="polite" aria-label="Terminal output"></div><form id="terminal-form"><label for="terminal-input"><span class="shell-user">visitor@afaq-linux</span>:<span class="shell-path">~</span>$</label><input id="terminal-input" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command"><button type="submit">Run ↵</button></form><p class="dialog-note">↑ ↓ history · Tab complete · Ctrl+L clear · Esc close</p></dialog>
   <dialog id="palette" aria-labelledby="palette-title"><div class="dialog-header"><h2 id="palette-title">Where would you like to go?</h2><button data-close aria-label="Close command menu">×</button></div><nav aria-label="Quick navigation"><a href="#projects">01 <span>Explore work</span> ↗</a><a href="#experience">02 <span>Experience</span> ↗</a><a href="#about">03 <span>About me</span> ↗</a><a href="#contact">04 <span>Get in touch</span> ↗</a><a href="docs/AFAQ_MOHAMMAD_CV.pdf" download>↓ <span>Download CV</span></a><button data-terminal>&gt;_ <span>Open terminal</span> ↵</button></nav><p class="dialog-note">Tab to navigate · Enter to select · Esc to close</p></dialog>
+  <dialog id="crash" aria-labelledby="crash-title" aria-describedby="crash-message">
+    <div class="crash-panel">
+      <p class="crash-code">PROCESS 0318 / SIGNAL 9</p>
+      <div class="crash-symbol" aria-hidden="true">[ × ]</div>
+      <h2 id="crash-title">Well. You killed it.</h2>
+      <p id="crash-message">Portfolio process terminated.<br>Curiosity: still running.</p>
+      <pre class="crash-log" aria-hidden="true">$ kill portfolio
+[stopped] ambition.service
+[stopped] coffee.daemon
+[failed]  pretending_everything_is_fine
+
+exit code: 137</pre>
+      <button id="restart" class="button primary">Reboot portfolio <span aria-hidden="true">↻</span></button>
+    </div>
+  </dialog>
+
 </body>
 </html>
