@@ -212,6 +212,18 @@
   print('Simulated filesystem · local to this tab · resets on reload');
   print('');
 
+  const ideScene = document.querySelector('.ide-opening-scene');
+  if (ideScene && 'IntersectionObserver' in window) {
+    ideScene.classList.add('ide-waiting');
+    const ideObserver = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        ideScene.classList.remove('ide-waiting');
+        ideObserver.disconnect();
+      }
+    }, {threshold: .4});
+    ideObserver.observe(ideScene);
+  }
+
   // A slow field of character-based waves. No external animation libraries.
   const canvas = document.querySelector('#signal');
   const context = canvas.getContext('2d');
@@ -222,6 +234,18 @@
   let inView = true, paused = false;
   let pointer = {x:-1000,y:-1000};
   const glyphs = ' .:+=*#%@';
+  const portrait = new Image();
+  const portraitSample = document.createElement('canvas');
+  portraitSample.width = 100; portraitSample.height = 120;
+  const sampleContext = portraitSample.getContext('2d', {willReadFrequently:true});
+  let portraitPixels = null;
+  portrait.addEventListener('load', () => {
+    const scale = Math.max(100 / portrait.width, 120 / portrait.height);
+    sampleContext.drawImage(portrait, (100 - portrait.width * scale) / 2, (120 - portrait.height * scale) / 2, portrait.width * scale, portrait.height * scale);
+    portraitPixels = sampleContext.getImageData(0, 0, 100, 120).data;
+    draw();
+  });
+  portrait.src = 'assets/portrait.jpg';
   const isStill = () => paused || motionQuery.matches;
   const draw = () => {
     context.clearRect(0,0,width,height);
@@ -245,6 +269,35 @@
         const glyph = glyphs[Math.min(glyphs.length-1,Math.floor(density*glyphs.length))];
         context.fillText(glyph,x,y + touch * Math.sin(time)*3);
       }
+    }
+    if (portraitPixels) {
+      const pw = Math.min(width * (mobile ? .8 : .38), 460);
+      const ph = pw * 1.2;
+      const px = width - pw - width * .055;
+      const py = (height - ph) / 2;
+      const sweep = isStill() ? .5 : (time * .13) % 1.6 - .3;
+      const cellX = mobile ? 5 : 6;
+      const cellY = mobile ? 7 : 8;
+      context.save();
+      context.font = `${mobile ? 7 : 8}px ui-monospace, monospace`;
+      context.textBaseline = 'middle';
+      for (let y = 0; y < ph; y += cellY) {
+        for (let x = 0; x < pw; x += cellX) {
+          const sx = Math.min(99, Math.floor(x / pw * 100));
+          const sy = Math.min(119, Math.floor(y / ph * 120));
+          const i = (sy * 100 + sx) * 4;
+          const brightness = (portraitPixels[i] * .2126 + portraitPixels[i + 1] * .7152 + portraitPixels[i + 2] * .0722) / 255;
+          const band = Math.exp(-Math.pow((y / ph - sweep) / .19, 2));
+          const edge = Math.min(1, x / 25, (pw - x) / 25, y / 25, (ph - y) / 25);
+          const tone = light ? 1 - brightness : brightness;
+          const alpha = (.16 + band * .84) * edge;
+          context.fillStyle = light ? `rgba(15,80,85,${alpha})` : `rgba(141,235,219,${alpha})`;
+          const characters = ' .,:;i1tfLCG08@';
+          const character = characters[Math.min(characters.length - 1, Math.floor(tone * characters.length))];
+          context.fillText(character, px + x, py + y);
+        }
+      }
+      context.restore();
     }
   };
   const tick = stamp => {
